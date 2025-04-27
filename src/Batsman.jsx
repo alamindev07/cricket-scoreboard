@@ -1,3 +1,4 @@
+// normal function
 // import { useState } from "react"
 
 // export default function Batsman (){
@@ -43,16 +44,131 @@
 //     )
 // }
 
-import "./Batsman.css";
 
-import { useState } from "react";
+
+// without modal start
+
+
+
+// import "./Batsman.css";
+
+// import { useState } from "react";
+
+// export default function Batsman() {
+//   const [batsman1, setBatsman1] = useState({ runs: 0, fours: 0, sixes: 0 });
+//   const [batsman2, setBatsman2] = useState({ runs: 0, fours: 0, sixes: 0 });
+
+//   // Optional: Set who is currently on strike
+//   const [onStrike, setOnStrike] = useState("batsman1");
+
+//   const handleRun = (type) => {
+//     const updateStats = (batsman, runValue, isFour = false, isSix = false) => {
+//       return {
+//         runs: batsman.runs + runValue,
+//         fours: batsman.fours + (isFour ? 1 : 0),
+//         sixes: batsman.sixes + (isSix ? 1 : 0),
+//       };
+//     };
+
+//     const runValue = type === "single" ? 1 : type === "four" ? 4 : 6;
+//     const isFour = type === "four";
+//     const isSix = type === "six";
+
+//     if (onStrike === "batsman1") {
+//       setBatsman1((prev) => updateStats(prev, runValue, isFour, isSix));
+//     } else {
+//       setBatsman2((prev) => updateStats(prev, runValue, isFour, isSix));
+//     }
+
+//     // Change strike on odd runs (optional)
+//     if (runValue % 2 !== 0) {
+//       setOnStrike((prev) => (prev === "batsman1" ? "batsman2" : "batsman1"));
+//     }
+//   };
+
+//   const totalRuns = batsman1.runs + batsman2.runs;
+//   const totalFours = batsman1.fours + batsman2.fours;
+//   const totalSixes = batsman1.sixes + batsman2.sixes;
+
+//   return (
+//     <div>
+//       <div className="allBatsman">
+//         <div className="batsman">
+//           <h2>Total Runs of Bandladesh Team</h2>
+//           <p>Total Runs: {totalRuns}</p>
+//           <p>Total Fours: {totalFours}</p>
+//           <p>Total Sixes: {totalSixes}</p>
+//         </div>
+
+//         <div className="batsman">
+//           <h4>Batsman 1</h4>
+//           <p>Runs: {batsman1.runs}</p>
+//           <p>Fours: {batsman1.fours}</p>
+//           <p>Sixes: {batsman1.sixes}</p>
+
+//           <p>Batsman1 Total Runs: {batsman1.runs}</p>
+//         </div>
+
+//         <div className="batsman">
+//           <h4>Batsman 2</h4>
+//           <p>Runs: {batsman2.runs}</p>
+//           <p>Fours: {batsman2.fours}</p>
+//           <p>Sixes: {batsman2.sixes}</p>
+
+//           <p>Batsman2 Total Runs: {batsman2.runs}</p>
+//         </div>
+//       </div>
+//       <div className="batsman">
+//         <h3 className="onstrik">
+//           Currently on strike:{" "}
+//           <span
+//             className={
+//               onStrike === "batsman1" ? "onstrikBatsman1" : "onstrikBatsman2"
+//             }
+//           >
+//             {onStrike}
+//           </span>
+//         </h3>
+//       </div>{" "}
+//       <br />
+//       <div className="btnStyle">
+//         <button className="btn-style" onClick={() => handleRun("single")}>
+//           Single
+//         </button>
+//         <button className="btn-style" onClick={() => handleRun("four")}>
+//           Four
+//         </button>
+//         <button className="btn-style" onClick={() => handleRun("six")}>
+//           Six
+//         </button>
+//         <button
+//           className="btn-style2"
+//           onClick={() =>
+//             setOnStrike(onStrike === "batsman1" ? "batsman2" : "batsman1")
+//           }
+//         >
+//           Change Strike
+//         </button>
+//       </div>
+//     </div>
+//   );
+// }
+
+
+
+// working with modal
+
+import "./Batsman.css";
+import { useState, useEffect } from "react";
 
 export default function Batsman() {
   const [batsman1, setBatsman1] = useState({ runs: 0, fours: 0, sixes: 0 });
   const [batsman2, setBatsman2] = useState({ runs: 0, fours: 0, sixes: 0 });
-
-  // Optional: Set who is currently on strike
   const [onStrike, setOnStrike] = useState("batsman1");
+
+  const [showModal, setShowModal] = useState(false);
+  const [congratulationMessage, setCongratulationMessage] = useState("");
+  const [shownMilestones, setShownMilestones] = useState({ batsman1: [], batsman2: [] });
 
   const handleRun = (type) => {
     const updateStats = (batsman, runValue, isFour = false, isSix = false) => {
@@ -73,7 +189,7 @@ export default function Batsman() {
       setBatsman2((prev) => updateStats(prev, runValue, isFour, isSix));
     }
 
-    // Change strike on odd runs (optional)
+    // Change strike on odd runs
     if (runValue % 2 !== 0) {
       setOnStrike((prev) => (prev === "batsman1" ? "batsman2" : "batsman1"));
     }
@@ -83,11 +199,39 @@ export default function Batsman() {
   const totalFours = batsman1.fours + batsman2.fours;
   const totalSixes = batsman1.sixes + batsman2.sixes;
 
+  useEffect(() => {
+    const checkMilestone = (batsman, batsmanName) => {
+      const milestones = [50, 100];
+      milestones.forEach((milestone) => {
+        if (batsman.runs >= milestone && !shownMilestones[batsmanName].includes(milestone)) {
+          setCongratulationMessage(`🎉 Congratulations! ${batsmanName} reached ${milestone} runs!`);
+          setShowModal(true);
+          setShownMilestones((prev) => ({
+            ...prev,
+            [batsmanName]: [...prev[batsmanName], milestone],
+          }));
+        }
+      });
+    };
+
+    checkMilestone(batsman1, "batsman1");
+    checkMilestone(batsman2, "batsman2");
+  }, [batsman1, batsman2, shownMilestones]);
+
   return (
     <div>
+      {showModal && (
+        <div className="modal">
+          <div className="modal-content">
+            <h2>{congratulationMessage}</h2>
+            <button onClick={() => setShowModal(false)}>Close</button>
+          </div>
+        </div>
+      )}
+      
       <div className="allBatsman">
         <div className="batsman">
-          <h2>Total Runs of Bandladesh Team</h2>
+          <h2>Total Runs of Bangladesh Team</h2>
           <p>Total Runs: {totalRuns}</p>
           <p>Total Fours: {totalFours}</p>
           <p>Total Sixes: {totalSixes}</p>
@@ -98,8 +242,6 @@ export default function Batsman() {
           <p>Runs: {batsman1.runs}</p>
           <p>Fours: {batsman1.fours}</p>
           <p>Sixes: {batsman1.sixes}</p>
-
-          <p>Batsman1 Total Runs: {batsman1.runs}</p>
         </div>
 
         <div className="batsman">
@@ -107,10 +249,9 @@ export default function Batsman() {
           <p>Runs: {batsman2.runs}</p>
           <p>Fours: {batsman2.fours}</p>
           <p>Sixes: {batsman2.sixes}</p>
-
-          <p>Batsman2 Total Runs: {batsman2.runs}</p>
         </div>
       </div>
+
       <div className="batsman">
         <h3 className="onstrik">
           Currently on strike:{" "}
@@ -122,7 +263,8 @@ export default function Batsman() {
             {onStrike}
           </span>
         </h3>
-      </div>{" "}
+      </div>
+
       <br />
       <div className="btnStyle">
         <button className="btn-style" onClick={() => handleRun("single")}>
